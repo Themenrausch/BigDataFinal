@@ -1,3 +1,29 @@
+# 更新流程
+
+第一次：
+
+```shell
+git clone git@github.com:Themenrausch/BigDataFinal.git
+```
+
+后续：
+
+```shell
+git checkout master
+git pull
+git checkout -b feature/xxx (-b只有第一次创建分支要加，后续再在这个分支上工作只是去这个分支)
+```
+
+对项目进行改动之后：
+
+```shell
+git add .
+git commit -m "xxx"
+git push -u origin feature/xxx (-u以及之后的内容也只有第一次push这个分支需要加)
+```
+
+GitHub 提示 `Compare & pull request` 
+
 # 粗略介绍：一个大概率能用的原始版本。
 
 ## 文件介绍
