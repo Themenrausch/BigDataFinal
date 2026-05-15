@@ -1,0 +1,21 @@
+DROP DATABASE IF EXISTS DingDongJi CASCADE;
+CREATE DATABASE DingDongJi;
+USE DingDongJi;
+CREATE TABLE cdinfo (
+    cellid BIGINT,
+    times BIGINT,
+    register INT,
+    phone BIGINT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+LOAD DATA LOCAL INPATH '/data/cdinfo_fixed.txt'
+OVERWRITE INTO TABLE cdinfo;
+
+CREATE TABLE infected (
+    phone BIGINT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+LOAD DATA LOCAL INPATH '/data/infected.txt'
+OVERWRITE INTO TABLE infected;
