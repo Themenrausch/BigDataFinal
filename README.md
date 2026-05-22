@@ -36,6 +36,12 @@ GitHub 提示 `Compare & pull request`
 
 `integeratedRedcode.scala` 是 `Redcode.scala` 的集群环境版本。
 
+`BigDataBuilder.scala` 是模拟数据生成脚本，生成方式为把已有样例数据按副本复制很多份，同时重新映射手机号和基站编号。
+
+`dingdongji_big_external.hql` 是 `dingdongji.hql` 的集群版本，仅是将数据读取位置改为hdfs。
+
+`check_contacts_include` 是hive结果校验脚本，即尝试使用hive独立完成任务，与spark处理结果比较是否一致。
+
 ## 使用介绍
 
 用到了 `Hadoop` `Hive` `Spark` 
@@ -61,7 +67,13 @@ hive -f /data/dingdongji.hql
 接下来根据自己的 `dagoujiao.jar` 的位置，执行如下命令
 
 ```shell
-spark-submit --master yarn --deploy-mode client --class com.tipdm.covid19.Redcode /data/BigDataFinal/Hausaufgabe/out/artifacts/dagoujiao/dagoujiao.jar dingdongji.cdinfo dingdongji.infected dingdongji.infected_info dingdongji.all_timerange dingdongji.infected_timerange dingdongji.contacts include robust hdfs://master:8020/user/root/out
+spark-submit --master yarn --deploy-mode client --class com.tipdm.covid19.Redcode /data/BigDataFinal/out/artifacts/dagoujiao/dagoujiao.jar dingdongji.cdinfo dingdongji.infected dingdongji.infected_info dingdongji.all_timerange dingdongji.infected_timerange dingdongji.contacts include robust hdfs://master:8020/user/root/out
+```
+
+或者
+
+```shell
+spark-submit --master yarn --deploy-mode cluster --files $HIVE_HOME/conf/hive-site.xml --class com.tipdm.covid19.Redcode /data/BigDataFinal/out/artifacts/dagoujiao/dagoujiao.jar dingdongji.cdinfo dingdongji.infected dingdongji.infected_info dingdongji.all_timerange dingdongji.infected_timerange dingdongji.contacts include robust hdfs://master:8020/user/root/out
 ```
 
 各个参数意义为
@@ -83,6 +95,6 @@ spark-submit --master yarn --deploy-mode client --class com.tipdm.covid19.Redcod
 # TODO
 
 1. 目前只是肉眼看了前二十行，处理结果与 `python` 的结果一致，还没有完全核对过，也许应该严格核对一下？
-2. 如前文所述，需要处理一下 `cluster` 的问题。
+2. 如前文所述，需要处理一下 `cluster` 的问题。（done）
 3. 目前还没有生成大规模数据，没有在大规模数据上试过，需要试一试。
 4. 这一版本的代码中有许多屎山，包括各种 `count()` `cache()` 等，当时加这些是因为程序处理完数据之后，`spark-shell` 警告我找不到本来应该出现的数据表，处理这一异常的过程中，我考虑了缓存、惰性计算等各种因素，最后正常了，但我也不知道哪些是能删的。具体哪些是潜在屎山还是看代码注释吧。
