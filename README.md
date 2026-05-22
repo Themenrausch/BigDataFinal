@@ -84,6 +84,56 @@ spark-submit --master yarn --deploy-mode client --class com.tipdm.covid19.Redcod
 
 更具体的介绍直接看 `Redcode.scala` 的代码注释罢。
 
+完成后执行以下指令导出结果文件
+
+```shell
+hdfs dfs -cat hdfs://master:8020/user/root/out/part-* > /data/redmark01.txt
+```
+
+处理结果校验流程如下
+首先检查文件格式，假设结果文件为 `\data` 下的 `remark01.txt`，执行以下指令
+
+```shell
+awk 'NF != 1 || $1 !~ /^[0-9]+$/ {print "bad line:", NR, $0; bad=1} END{exit bad}' /data/redmark01.txt
+sort -n -c /data/redmark01.txt
+sort -n /data/redmark01.txt | uniq -d | head
+```
+
+指令依次为：检查“手机号逐行排列、没有空行、没有乱字符”、检查手机号升序、检查重复手机号，若无输出，则说明正确
+
+然后执行
+
+```shell
+hive -f /data/check_contacts_include.hql
+```
+
+调用hive校验脚本，若正确，则结果日志中会出现
+
+```shell
+missing_in_spark    0
+extra_in_spark      0
+duplicate_phone_groups_in_contacts    0
+```
+
+以下为模拟数据生成脚本使用方式
+执行命令调用脚本
+
+```shell
+spark-submit \
+--master yarn \
+--deploy-mode cluster \
+--class com.tipdm.covid19.BigDataBuilder \
+/data/BigDataFinal/out/artifacts/dagoujiao/dagoujiao.jar \
+hdfs://master:8020/user/root/redcode/sample/cdinfo_fixed.txt \
+hdfs://master:8020/user/root/redcode/sample/infected.txt \
+100 \
+1 \
+hdfs://master:8020/user/root/redcode/generated_100 \
+4
+```
+
+即从hdfs上的样例 `cdinfo_fixed.txt` 和 `infected.txt` 读取数据，把 `cdinfo` 复制100份；只把第1份里的感染者写入新的 infected_big；生成结果写到 `hdfs://master:8020/user/root/redcode/generated_100`；输出时使用 4 个分区。
+
 # 当前方法的问题
 
 目前方法的缺陷是不能用 `--deploy-mod cluster` ，这几乎一定会影响处理速度吧？解释是我们教学平台用的集群不是真集群？解决方案有如下选择：
@@ -94,7 +144,7 @@ spark-submit --master yarn --deploy-mode client --class com.tipdm.covid19.Redcod
 
 # TODO
 
-1. 目前只是肉眼看了前二十行，处理结果与 `python` 的结果一致，还没有完全核对过，也许应该严格核对一下？
-2. 如前文所述，需要处理一下 `cluster` 的问题。（done）
-3. 目前还没有生成大规模数据，没有在大规模数据上试过，需要试一试。
+1. 目前只是肉眼看了前二十行，处理结果与 `python` 的结果一致，还没有完全核对过，也许应该严格核对一下？（done?）
+2. 如前文所述，需要处理一下 `cluster` 的问题。（done?）
+3. 目前还没有生成大规模数据，没有在大规模数据上试过，需要试一试。（done?）
 4. 这一版本的代码中有许多屎山，包括各种 `count()` `cache()` 等，当时加这些是因为程序处理完数据之后，`spark-shell` 警告我找不到本来应该出现的数据表，处理这一异常的过程中，我考虑了缓存、惰性计算等各种因素，最后正常了，但我也不知道哪些是能删的。具体哪些是潜在屎山还是看代码注释吧。
