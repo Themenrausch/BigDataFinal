@@ -91,6 +91,7 @@ hdfs dfs -cat hdfs://master:8020/user/root/out/part-* > /data/redmark01.txt
 ```
 
 处理结果校验流程如下
+
 首先检查文件格式，假设结果文件为 `\data` 下的 `remark01.txt`，执行以下指令
 
 ```shell
@@ -116,23 +117,28 @@ duplicate_phone_groups_in_contacts    0
 ```
 
 以下为模拟数据生成脚本使用方式
+
 执行命令调用脚本
 
 ```shell
-spark-submit \
+time spark-submit \
 --master yarn \
 --deploy-mode cluster \
+--files $HIVE_HOME/conf/hive-site.xml
 --class com.tipdm.covid19.BigDataBuilder \
 /data/BigDataFinal/out/artifacts/dagoujiao/dagoujiao.jar \
-hdfs://master:8020/user/root/redcode/sample/cdinfo_fixed.txt \
-hdfs://master:8020/user/root/redcode/sample/infected.txt \
-100 \
-1 \
-hdfs://master:8020/user/root/redcode/generated_100 \
-4
+12000000 \
+100000 \
+8 \
+50 \
+200 \
+20220507 \
+hdfs://master:8020/user/root/redcode/synthetic_8g \
+200 \
+false
 ```
 
-即从hdfs上的样例 `cdinfo_fixed.txt` 和 `infected.txt` 读取数据，把 `cdinfo` 复制100份；只把第1份里的感染者写入新的 infected_big；生成结果写到 `hdfs://master:8020/user/root/redcode/generated_100`；输出时使用 4 个分区。
+即生成 1200 万个手机号、10 万个基站、每人平均约 8 次停留、50 个感染者、每个感染者额外注入 200 个接触者。；输出时使用 200 个分区。
 
 # 当前方法的问题
 
