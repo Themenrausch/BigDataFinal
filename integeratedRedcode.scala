@@ -63,9 +63,9 @@ object Redcode {
             infected.select("phone").distinct(),
             Seq("phone"),
             "left_semi"
-        ).cache()
+        )
 
-        infected_info.count()
+        // infected_info.count()
 
         println("processing infected_info")
         infected_info.write
@@ -135,8 +135,8 @@ object Redcode {
                 col("register").cast("int")
             )
             .as[RawRecord]
-            .cache()
-        ds.count()
+        //     .cache()
+        // ds.count()
 
         // 分组状态机处理
         val intervalDS = ds
@@ -194,8 +194,8 @@ object Redcode {
                 }
             result.iterator
         }
-        intervalDS.cache()
-        intervalDS.count()
+        // intervalDS.cache()
+        // intervalDS.count()
         // 输出
         val resultDF = (if (includePhone) {
                 intervalDS.toDF()
@@ -203,8 +203,8 @@ object Redcode {
                 intervalDS
                     .drop("phone")
                     .toDF()
-            }).cache()
-        resultDF.count()
+            })
+        // resultDF.count()
 
         resultDF.write
             .mode(SaveMode.Overwrite)
@@ -218,8 +218,8 @@ object Redcode {
                         includePhone: Boolean = true,
                         outputTable: String
                         ): Unit = {
-        val df = spark.table(inputTable).cache()
-        df.count()
+        val df = spark.table(inputTable)
+        // df.count()
         // 同一 phone + cellid 内按时间排序
         val windowSpec = Window.partitionBy("phone", "cellid")
             .orderBy("times")
@@ -245,8 +245,8 @@ object Redcode {
             // 生成区间
             .withColumn("enter_time", col("prev_time"))
             .withColumn("exit_time", col("times"))
-            .cache()
-        resultDF.count()
+            // .cache()
+        // resultDF.count()
 
         val finalDF = (if (includePhone) {
             resultDF.select(
@@ -261,8 +261,8 @@ object Redcode {
                 col("enter_time"),
                 col("exit_time")
                 )
-            }).cache()
-        finalDF.count()
+            })
+        // finalDF.count()
         finalDF.write
             .mode(SaveMode.Overwrite)
             .saveAsTable(outputTable)
@@ -309,8 +309,8 @@ object Redcode {
                 col("exit_time")
             )
             .alias("infected")
-            .cache()
-        infectedDF.count()
+            // .cache()
+        // infectedDF.count()
 
         val allDF = spark.table(inputTableAll)
             .select(
@@ -320,8 +320,8 @@ object Redcode {
                 col("exit_time")
             )
             .alias("all")
-            .cache()
-        allDF.count()
+            // .cache()
+        // allDF.count()
         // 区间重叠
         val overlapDF = infectedDF
             .join(
@@ -333,8 +333,8 @@ object Redcode {
             )
             .select(col("all.phone"))
             .distinct()
-            .cache()
-        overlapDF.count()
+            // .cache()
+        // overlapDF.count()
         val resultDF = (if (includeInfected) {
                 overlapDF.orderBy("phone")
             } else {
@@ -348,8 +348,8 @@ object Redcode {
                     "left_anti"
                 )
                 .orderBy("phone")
-            }).cache()
-        resultDF.count()
+            })
+        // resultDF.count()
         resultDF.write
             .mode(SaveMode.Overwrite)
             .saveAsTable(outputTable)
