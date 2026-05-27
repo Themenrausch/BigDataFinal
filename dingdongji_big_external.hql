@@ -11,7 +11,7 @@ create external table cdinfo (
 row format delimited
 fields terminated by ','
 stored as textfile
-location 'hdfs://master:8020/user/root/redcode/generated_512mb/cdinfo_fixed_big';
+location 'hdfs://master:8020/user/root/redcode/generated_8G/cdinfo_fixed_big';
 
 create external table infected (
     phone bigint
@@ -19,7 +19,7 @@ create external table infected (
 row format delimited
 fields terminated by ','
 stored as textfile
-location 'hdfs://master:8020/user/root/redcode/generated_512mb/infected_big';
+location 'hdfs://master:8020/user/root/redcode/generated_8G/infected_big';
 
 select count(*) from cdinfo;
 select count(*) from infected;

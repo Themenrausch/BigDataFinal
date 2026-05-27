@@ -73,7 +73,25 @@ spark-submit --master yarn --deploy-mode client --class com.tipdm.covid19.Redcod
 或者
 
 ```shell
-spark-submit --master yarn --deploy-mode cluster --files $HIVE_HOME/conf/hive-site.xml --class com.tipdm.covid19.Redcode /data/BigDataFinal/out/artifacts/dagoujiao/dagoujiao.jar dingdongji.cdinfo dingdongji.infected dingdongji.infected_info dingdongji.all_timerange dingdongji.infected_timerange dingdongji.contacts include robust hdfs://master:8020/user/root/out
+spark-submit \
+--master yarn \
+--deploy-mode cluster \
+--files $HIVE_HOME/conf/hive-site.xml \
+--num-executors 4 \
+--executor-cores 3 \
+--executor-memory 1G \
+--conf spark.sql.shuffle.partitions=64 \
+--class com.tipdm.covid19.Redcode \
+/data/BigDataFinal/Hausaufgabe/out/artifacts/dagoujiao/dagoujiao.jar \
+dingdongji.cdinfo \
+dingdongji.infected \
+dingdongji.infected_info \
+dingdongji.all_timerange \
+dingdongji.infected_timerange \
+dingdongji.contacts \
+include \
+robust \
+hdfs://master:8020/user/root/out
 ```
 
 各个参数意义为
@@ -122,14 +140,17 @@ duplicate_phone_groups_in_contacts    0
 spark-submit \
 --master yarn \
 --deploy-mode cluster \
+--num-executors 4 \
+--executor-cores 3 \
+--executor-memory 1G \
 --class com.tipdm.covid19.BigDataBuilder \
-/data/BigDataFinal/out/artifacts/dagoujiao/dagoujiao.jar \
+/data/BigDataFinal/DataGenerator/out/artifacts/dagoujiao/dagoujiao.jar \
 hdfs://master:8020/user/root/redcode/sample/cdinfo_fixed.txt \
 hdfs://master:8020/user/root/redcode/sample/infected.txt \
-100 \
+4818 \
 1 \
-hdfs://master:8020/user/root/redcode/generated_100 \
-4
+hdfs://master:8020/user/root/redcode/generated_8G \
+32
 ```
 
 即从hdfs上的样例 `cdinfo_fixed.txt` 和 `infected.txt` 读取数据，把 `cdinfo` 复制100份；只把第1份里的感染者写入新的 infected_big；生成结果写到 `hdfs://master:8020/user/root/redcode/generated_100`；输出时使用 4 个分区。
