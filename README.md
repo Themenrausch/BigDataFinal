@@ -44,7 +44,7 @@ GitHub 提示 `Compare & pull request`
 
 ## 使用介绍
 
-用到了 `Hadoop` `Hive` `Spark` 
+用到了 `Hadoop` `Hive` `Spark` ，运行情况可以在 `8088` 端口找。
 
 使用流程是先
 
@@ -73,7 +73,25 @@ spark-submit --master yarn --deploy-mode client --class com.tipdm.covid19.Redcod
 或者
 
 ```shell
-spark-submit --master yarn --deploy-mode cluster --files $HIVE_HOME/conf/hive-site.xml --class com.tipdm.covid19.Redcode /data/BigDataFinal/out/artifacts/dagoujiao/dagoujiao.jar dingdongji.cdinfo dingdongji.infected dingdongji.infected_info dingdongji.all_timerange dingdongji.infected_timerange dingdongji.contacts include robust hdfs://master:8020/user/root/out
+spark-submit \
+--master yarn \
+--deploy-mode cluster \
+--files $HIVE_HOME/conf/hive-site.xml \
+--num-executors 4 \
+--executor-cores 3 \
+--executor-memory 1G \
+--conf spark.sql.shuffle.partitions=64 \
+--class com.tipdm.covid19.Redcode \
+/data/BigDataFinal/Hausaufgabe/out/artifacts/dagoujiao/dagoujiao.jar \
+dingdongji.cdinfo \
+dingdongji.infected \
+dingdongji.infected_info \
+dingdongji.all_timerange \
+dingdongji.infected_timerange \
+dingdongji.contacts \
+include \
+robust \
+hdfs://master:8020/user/root/out
 ```
 
 各个参数意义为
@@ -153,4 +171,4 @@ false
 1. 目前只是肉眼看了前二十行，处理结果与 `python` 的结果一致，还没有完全核对过，也许应该严格核对一下？（done?）
 2. 如前文所述，需要处理一下 `cluster` 的问题。（done?）
 3. 目前还没有生成大规模数据，没有在大规模数据上试过，需要试一试。（done?）
-4. 这一版本的代码中有许多屎山，包括各种 `count()` `cache()` 等，当时加这些是因为程序处理完数据之后，`spark-shell` 警告我找不到本来应该出现的数据表，处理这一异常的过程中，我考虑了缓存、惰性计算等各种因素，最后正常了，但我也不知道哪些是能删的。具体哪些是潜在屎山还是看代码注释吧。
+4. 这一版本的代码中有许多屎山，包括各种 `count()` `cache()` 等，当时加这些是因为程序处理完数据之后，`spark-shell` 警告我找不到本来应该出现的数据表，处理这一异常的过程中，我考虑了缓存、惰性计算等各种因素，最后正常了，但我也不知道哪些是能删的。具体哪些是潜在屎山还是看代码注释吧。（删掉了.cache，.count 可以正常运行）
